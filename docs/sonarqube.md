@@ -10,8 +10,11 @@ This project supports two quality workflows:
 Start the local quality stack:
 
 ```bash
+cp .env.example .env
 docker compose --profile quality up -d sonarqube
 ```
+
+Fill `SONAR_JDBC_USERNAME` and `SONAR_JDBC_PASSWORD` in `.env` before starting SonarQube locally.
 
 Open http://localhost:9000 and sign in with:
 
@@ -97,3 +100,15 @@ sonar.qualitygate.wait=true
 ```
 
 If the quality gate fails, the GitHub Actions job fails too.
+
+## Quality Gate Notes
+
+The workflow waits for the SonarQube Cloud quality gate with:
+
+```text
+sonar.qualitygate.wait=true
+```
+
+If the scanner logs end with `QUALITY GATE STATUS: FAILED`, the scan itself worked. Open the SonarQube Cloud dashboard link printed in the logs to see the failing condition.
+
+This repository keeps backend services covered by JaCoCo and frontend code covered by LCOV. Only generated route wiring, application entry points, and test setup files are excluded from coverage.

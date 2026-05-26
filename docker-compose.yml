@@ -3,14 +3,14 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: ${INCIDENT_DB:-incidents}
-      POSTGRES_USER: ${POSTGRES_USER:-opsboard}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-opsboard}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     ports:
       - "5433:5432"
     volumes:
       - incident-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-opsboard} -d ${INCIDENT_DB:-incidents}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?POSTGRES_USER is required} -d ${INCIDENT_DB:-incidents}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -19,14 +19,14 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: ${TEAM_DB:-teams}
-      POSTGRES_USER: ${POSTGRES_USER:-opsboard}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-opsboard}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     ports:
       - "5434:5432"
     volumes:
       - team-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-opsboard} -d ${TEAM_DB:-teams}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?POSTGRES_USER is required} -d ${TEAM_DB:-teams}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -37,8 +37,8 @@ services:
       dockerfile: incident-service/Dockerfile
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://incident-db:5432/${INCIDENT_DB:-incidents}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-opsboard}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-opsboard}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:?POSTGRES_USER is required}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     depends_on:
       incident-db:
         condition: service_healthy
@@ -51,8 +51,8 @@ services:
       dockerfile: team-service/Dockerfile
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://team-db:5432/${TEAM_DB:-teams}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-opsboard}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-opsboard}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:?POSTGRES_USER is required}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     depends_on:
       team-db:
         condition: service_healthy
@@ -89,8 +89,8 @@ services:
     profiles: ["quality"]
     environment:
       POSTGRES_DB: ${SONAR_DB:-sonarqube}
-      POSTGRES_USER: ${SONAR_JDBC_USERNAME:-sonarqube}
-      POSTGRES_PASSWORD: ${SONAR_JDBC_PASSWORD:-sonarqube}
+      POSTGRES_USER: ${SONAR_JDBC_USERNAME:?SONAR_JDBC_USERNAME is required}
+      POSTGRES_PASSWORD: ${SONAR_JDBC_PASSWORD:?SONAR_JDBC_PASSWORD is required}
     volumes:
       - sonarqube-db-data:/var/lib/postgresql/data
 
@@ -101,8 +101,8 @@ services:
       - sonarqube-db
     environment:
       SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/${SONAR_DB:-sonarqube}
-      SONAR_JDBC_USERNAME: ${SONAR_JDBC_USERNAME:-sonarqube}
-      SONAR_JDBC_PASSWORD: ${SONAR_JDBC_PASSWORD:-sonarqube}
+      SONAR_JDBC_USERNAME: ${SONAR_JDBC_USERNAME:?SONAR_JDBC_USERNAME is required}
+      SONAR_JDBC_PASSWORD: ${SONAR_JDBC_PASSWORD:?SONAR_JDBC_PASSWORD is required}
     ports:
       - "9000:9000"
     volumes:

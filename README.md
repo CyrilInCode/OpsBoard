@@ -19,6 +19,8 @@ cp .env.example .env
 docker compose up --build
 ```
 
+Fill `.env` before starting the stack. Password values are intentionally empty in `.env.example` and must not be committed.
+
 Open:
 
 - Frontend: http://localhost:3000
