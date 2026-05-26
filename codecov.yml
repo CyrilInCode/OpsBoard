@@ -1,0 +1,44 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 50%
+        threshold: 5%
+        if_ci_failed: error
+      backend:
+        target: 50%
+        threshold: 5%
+        flags:
+          - backend
+      frontend:
+        target: 50%
+        threshold: 5%
+        flags:
+          - frontend
+    patch:
+      default:
+        target: 50%
+        threshold: 10%
+
+flag_management:
+  default_rules:
+    carryforward: true
+  individual_flags:
+    - name: backend
+      paths:
+        - backend/
+    - name: frontend
+      paths:
+        - frontend/
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false
+
+ignore:
+  - "frontend/node_modules/**"
+  - "frontend/.output/**"
+  - "frontend/dist/**"
+  - "frontend/src/routeTree.gen.ts"
+  - "backend/**/target/**"

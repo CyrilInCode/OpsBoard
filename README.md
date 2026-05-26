@@ -10,6 +10,7 @@ It follows the requested constraints from `DevOps projet.pdf`:
 - At least two backend services integrated with Docker
 - Unit tests, web mock tests, repository tests
 - Code coverage with JaCoCo
+- Coverage upload with Codecov
 - Software quality checks with Checkstyle
 - Optional bonus: web frontend and PostgreSQL database
 
@@ -52,6 +53,7 @@ docker run --rm -v "$PWD/backend:/workspace" -w /workspace maven:3.9.9-eclipse-t
 Generated backend reports:
 
 - JaCoCo: `backend/*/target/site/jacoco/index.html`
+- JaCoCo XML for CI/Codecov: `backend/*/target/site/jacoco/jacoco.xml`
 - Surefire tests: `backend/*/target/surefire-reports`
 - Checkstyle: `backend/*/target/checkstyle-result.xml`
 
@@ -65,6 +67,21 @@ npm test -- --run
 npm run test:coverage
 npm run build
 ```
+
+Frontend coverage is generated at `frontend/coverage/lcov.info`.
+
+## Codecov
+
+GitHub Actions uploads backend JaCoCo XML reports and frontend LCOV reports to Codecov from the `quality` job.
+
+Add this repository secret in GitHub:
+
+```text
+CODECOV_TOKEN
+```
+
+Codecov behavior and thresholds are configured in `codecov.yml`.
+Full setup instructions are in `docs/codecov.md`.
 
 ## SonarQube
 
