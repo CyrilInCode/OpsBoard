@@ -79,6 +79,7 @@ SONAR_ORGANIZATION
 ```
 
 The project key and organization key are visible in the SonarQube Cloud project settings.
+They must be created as **Variables**, not as secrets. If they are missing, GitHub expands them to empty strings and the scanner receives invalid arguments such as `-Dsonar.projectKey=`.
 
 The GitHub Actions workflow runs:
 

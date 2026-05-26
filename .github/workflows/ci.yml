@@ -98,6 +98,24 @@ jobs:
       - name: Frontend build
         working-directory: frontend
         run: npm run build
+      - name: Check SonarQube Cloud configuration
+        env:
+          SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
+          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if [ -z "$SONAR_PROJECT_KEY" ]; then
+            echo "::error title=Missing SONAR_PROJECT_KEY::Create a repository variable named SONAR_PROJECT_KEY in Settings > Secrets and variables > Actions > Variables."
+            exit 1
+          fi
+          if [ -z "$SONAR_ORGANIZATION" ]; then
+            echo "::error title=Missing SONAR_ORGANIZATION::Create a repository variable named SONAR_ORGANIZATION in Settings > Secrets and variables > Actions > Variables."
+            exit 1
+          fi
+          if [ -z "$SONAR_TOKEN" ]; then
+            echo "::error title=Missing SONAR_TOKEN::Create a repository secret named SONAR_TOKEN in Settings > Secrets and variables > Actions > Secrets."
+            exit 1
+          fi
       - name: SonarQube Cloud analysis
         uses: SonarSource/sonarqube-scan-action@v7
         env:
