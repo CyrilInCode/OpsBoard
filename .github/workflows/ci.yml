@@ -45,6 +45,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate compose file
+        env:
+          POSTGRES_USER: ci_postgres_user
+          POSTGRES_PASSWORD: ci_postgres_password
+          SONAR_JDBC_USERNAME: ci_sonar_user
+          SONAR_JDBC_PASSWORD: ci_sonar_password
         run: docker compose config
 
   quality:
