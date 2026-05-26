@@ -62,10 +62,23 @@ cd frontend
 npm install
 npm run typecheck
 npm test -- --run
+npm run test:coverage
 npm run build
 ```
+
+## SonarQube
+
+Local quality dashboard:
+
+```bash
+docker compose --profile quality up -d sonarqube
+```
+
+Then open http://localhost:9000.
+
+GitHub Actions quality analysis is configured in `.github/workflows/ci.yml`.
+Full setup instructions are in `docs/sonarqube.md`.
 
 ## Written Report
 
 The submission report draft is in `docs/rapport.md`.
-

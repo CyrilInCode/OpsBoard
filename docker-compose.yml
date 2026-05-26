@@ -1,0 +1,119 @@
+services:
+  incident-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${INCIDENT_DB:-incidents}
+      POSTGRES_USER: ${POSTGRES_USER:-opsboard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-opsboard}
+    ports:
+      - "5433:5432"
+    volumes:
+      - incident-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-opsboard} -d ${INCIDENT_DB:-incidents}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  team-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${TEAM_DB:-teams}
+      POSTGRES_USER: ${POSTGRES_USER:-opsboard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-opsboard}
+    ports:
+      - "5434:5432"
+    volumes:
+      - team-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-opsboard} -d ${TEAM_DB:-teams}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  incident-service:
+    build:
+      context: ./backend
+      dockerfile: incident-service/Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://incident-db:5432/${INCIDENT_DB:-incidents}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-opsboard}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-opsboard}
+    depends_on:
+      incident-db:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+
+  team-service:
+    build:
+      context: ./backend
+      dockerfile: team-service/Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://team-db:5432/${TEAM_DB:-teams}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-opsboard}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-opsboard}
+    depends_on:
+      team-db:
+        condition: service_healthy
+    ports:
+      - "8082:8082"
+
+  gateway:
+    build:
+      context: ./backend
+      dockerfile: gateway/Dockerfile
+    environment:
+      INCIDENT_SERVICE_URL: http://incident-service:8081
+      TEAM_SERVICE_URL: http://team-service:8082
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000}
+    depends_on:
+      - incident-service
+      - team-service
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8080/api}
+      PORT: 3000
+    depends_on:
+      - gateway
+    ports:
+      - "3000:3000"
+
+  sonarqube-db:
+    image: postgres:16-alpine
+    profiles: ["quality"]
+    environment:
+      POSTGRES_DB: ${SONAR_DB:-sonarqube}
+      POSTGRES_USER: ${SONAR_JDBC_USERNAME:-sonarqube}
+      POSTGRES_PASSWORD: ${SONAR_JDBC_PASSWORD:-sonarqube}
+    volumes:
+      - sonarqube-db-data:/var/lib/postgresql/data
+
+  sonarqube:
+    image: sonarqube:community
+    profiles: ["quality"]
+    depends_on:
+      - sonarqube-db
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/${SONAR_DB:-sonarqube}
+      SONAR_JDBC_USERNAME: ${SONAR_JDBC_USERNAME:-sonarqube}
+      SONAR_JDBC_PASSWORD: ${SONAR_JDBC_PASSWORD:-sonarqube}
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+
+volumes:
+  incident-db-data:
+  team-db-data:
+  sonarqube-db-data:
+  sonarqube-data:
+  sonarqube-extensions:
+  sonarqube-logs:

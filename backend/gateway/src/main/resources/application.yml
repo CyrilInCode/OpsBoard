@@ -1,0 +1,37 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          "[/**]":
+            allowedOrigins:
+              - ${FRONTEND_ORIGIN:http://localhost:3000}
+            allowedMethods:
+              - GET
+              - POST
+              - PATCH
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+      routes:
+        - id: incident-service
+          uri: ${INCIDENT_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/incidents/**
+        - id: team-service
+          uri: ${TEAM_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/teams/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+

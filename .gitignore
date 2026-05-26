@@ -1,0 +1,17 @@
+.DS_Store
+.idea/
+.vscode/
+
+target/
+*.log
+*.class
+
+node_modules/
+dist/
+.output/
+.vinxi/
+.tanstack/
+coverage/
+
+.env
+
